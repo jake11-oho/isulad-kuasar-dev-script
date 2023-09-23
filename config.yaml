@@ -10,13 +10,13 @@ tag_name: "openeuler/kuasar:latest"
 
 ######## Config for running a container ########
 # Workspace which will be mounted into container
-workspace: "/workspace"
+workspace: "/home/jake/workspace"
 # Virtual block image for creating devicemapper
 block_img: "/kuasar_env.img"
 # Size of the above image (MB)
 block_size: 5000
 # Loop device to mount block image
-loop: "/dev/loop123"
+loop: "/dev/loop17"
 # LVM group name for devicemapper
 group: "isulad0"
 # Container name for development environment

@@ -4,6 +4,15 @@
     "graph": "/var/lib/isulad",
     "state": "/var/run/isulad",
     "engine": "lcr",
+    "cri-sandboxers": {
+        "kuasar": {
+            "name": "vmm",
+            "address": "/run/vmm-sandboxer.sock"
+        }
+    },
+    "cri-runtimes": {
+        "kuasar": "io.containerd.kuasar.v1"
+    },
     "sandboxers": {
         "kuasar": {
             "address": "/run/vmm-sandboxer.sock",
@@ -46,5 +55,6 @@
     "cni-conf-dir": "",
     "image-layer-check": false,
     "use-decrypted-key": true,
-    "insecure-skip-verify-enforce": false
+    "insecure-skip-verify-enforce": false,
+    "enable-cri-v1": true
 }

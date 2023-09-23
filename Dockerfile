@@ -69,6 +69,7 @@ ENV LD_LIBRARY_PATH=/usr/local/lib
 WORKDIR /home/openeuler
 RUN git clone https://gitee.com/src-openeuler/lxc.git
 WORKDIR /home/openeuler/lxc
+RUN git checkout openEuler-22.03-LTS-SP2
 RUN rm -rf lxc-4.0.3
 RUN git config --global --add safe.directory /home/openeuler/lxc/lxc-4.0.3
 RUN ./apply-patches
@@ -81,23 +82,13 @@ RUN rm -rf lxc
 
 # Build lcr
 WORKDIR /home/openeuler
-RUN git clone -b dev-sandbox https://gitee.com/openeuler/lcr.git
+RUN git clone https://gitee.com/openeuler/lcr.git
 WORKDIR /home/openeuler/lcr/build
 RUN cmake ..
 RUN make -j $(nproc)
 RUN make install
 WORKDIR /home/openeuler
 RUN rm -rf lcr
-
-# Build clibcni
-WORKDIR /home/openeuler
-RUN git clone https://gitee.com/openeuler/clibcni.git
-WORKDIR /home/openeuler/clibcni/build
-RUN cmake ..
-RUN make -j $(nproc)
-RUN make install
-WORKDIR /home/openeuler
-RUN rm -rf clibcni
 
 # Build lib-shim-v2
 WORKDIR /home/openeuler
@@ -110,9 +101,9 @@ RUN rm -rf lib-shim-v2
 
 # Build iSulad
 WORKDIR /home/openeuler
-RUN git clone -b dev-sandbox https://gitee.com/openeuler/iSulad.git
+RUN git clone https://gitee.com/openeuler/iSulad.git
 WORKDIR /home/openeuler/iSulad/build
-RUN cmake .. -D ENABLE_SANDBOX=ON -D ENABLE_SHIM_V2=ON && make -j 4
+RUN cmake .. -D ENABLE_SANDBOXER=ON -D ENABLE_CRI_API_V1=ON -D ENABLE_SHIM_V2=ON && make -j $(nproc)
 RUN make install
 WORKDIR /home/openeuler
 RUN rm -rf iSulad
@@ -120,14 +111,16 @@ RUN rm -rf iSulad
 COPY data/daemon.json /etc/isulad/daemon.json
 
 # Build kuasar with qemu support
-WORKDIR /home/openeuler
-RUN git clone https://github.com/kuasar-io/kuasar.git
-WORKDIR /home/openeuler/kuasar/vmm/sandbox
-RUN cargo build --release --features=qemu
-RUN cp -f /home/openeuler/kuasar/vmm/sandbox/target/release/vmm-sandboxer /usr/local/bin/vmm-sandboxer
-WORKDIR /home/openeuler
-RUN rm -rf kuasar
+# WORKDIR /home/openeuler
+# RUN git clone https://github.com/kuasar-io/kuasar.git
+# WORKDIR /home/openeuler/kuasar/vmm/sandbox
+# RUN cargo build --release --features=qemu
+# RUN cp -f /home/openeuler/kuasar/vmm/sandbox/target/release/vmm-sandboxer /usr/local/bin/vmm-sandboxer
+# WORKDIR /home/openeuler
+# RUN rm -rf kuasar
 ########################################################
+
+COPY data/vmm-sandboxer /usr/local/bin/vmm-sandboxer
 
 # Install kuasar
 RUN mkdir -p /var/lib/kuasar
@@ -137,16 +130,30 @@ RUN mkdir -p /usr/share/defaults/kata-containers
 COPY data/configuration.toml /usr/share/defaults/kata-containers/configuration.toml
 
 # Install crictl tool
+# WORKDIR /home/openeuler
+# RUN wget https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.25.0/crictl-v1.25.0-linux-amd64.tar.gz
+# RUN tar -xvf crictl-v1.25.0-linux-amd64.tar.gz
+# RUN mv crictl /usr/local/bin
+# COPY data/crictl.yaml /etc/crictl.yaml
+# RUN rm -f crictl-v1.25.0-linux-amd64.tar.gz
+
 WORKDIR /home/openeuler
-RUN wget https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.22.0/crictl-v1.22.0-linux-amd64.tar.gz
-RUN tar -xvf crictl-v1.22.0-linux-amd64.tar.gz
+COPY data/crictl-v1.25.0-linux-amd64.tar.gz .
+RUN tar -xvf crictl-v1.25.0-linux-amd64.tar.gz
 RUN mv crictl /usr/local/bin
 COPY data/crictl.yaml /etc/crictl.yaml
-RUN rm -f crictl-v1.22.0-linux-amd64.tar.gz
+RUN rm -f crictl-v1.25.0-linux-amd64.tar.gz
 
 # Install socat
+# WORKDIR /home/openeuler
+# RUN wget http://www.dest-unreach.org/socat/download/socat-1.7.4.4.tar.gz
+# RUN tar -xvf socat-1.7.4.4.tar.gz
+# WORKDIR /home/openeuler/socat-1.7.4.4
+# RUN ./configure && make && make install
+# WORKDIR /home/openeuler
+# RUN rm -rf socat-1.7.4.4 socat-1.7.4.4.tar.gz
 WORKDIR /home/openeuler
-RUN wget http://www.dest-unreach.org/socat/download/socat-1.7.4.4.tar.gz
+COPY data/socat-1.7.4.4.tar.gz .
 RUN tar -xvf socat-1.7.4.4.tar.gz
 WORKDIR /home/openeuler/socat-1.7.4.4
 RUN ./configure && make && make install

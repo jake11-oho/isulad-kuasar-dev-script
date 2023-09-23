@@ -2,8 +2,8 @@
 
 set -x
 
-kuasar_workspace=""
-vmm_task_binary=""
+kuasar_workspace="/workspace/kuasar"
+vmm_task_binary="/workspace/kuasar/vmm/task/target/x86_64-unknown-linux-musl/release/vmm-task"
 initrd_image="/var/lib/kuasar/kuasar.initrd"
 
 function usage() {
